@@ -1,0 +1,20 @@
+. /lib/functions.sh
+
+case "$(board_name)" in
+	bananapi,bpi-r3)
+	compat_version="$(uci get system.@system[0].compat_version)"
+	if [ "${compat_version%%.*}" = "1" ] && [ "${compat_version##*.}" -le 1 ]; then
+		uci set system.@system[0].compat_version="1.2"
+		uci commit system
+	fi
+	;;
+	tenda,be12-pro)
+		grep -q lan5 /etc/config/network || {
+			sed -i 's/lan3/lan5/g' /etc/config/network
+			sed -i 's/lan2/lan4/g' /etc/config/network
+			sed -i 's/lan1/lan3/g' /etc/config/network
+		}
+	;;
+esac
+
+exit 0

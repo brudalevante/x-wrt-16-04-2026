@@ -1,0 +1,32 @@
+#!/bin/sh /etc/rc.common
+
+START=99
+
+boot() {
+	case $(board_name) in
+	arcadyan,aw1000)
+		bootcmd=$(fw_printenv -n bootcmd 2>/dev/null)
+		if [ "$bootcmd" = "bootipq" ]; then
+			fw_setenv bootusb "usb start && usbboot 0x44000000 0 && bootm 0x44000000"
+			fw_setenv bootcmd "run bootusb; bootipq"
+		fi
+	;;
+	edgecore,eap102|\
+	yuncore,ax880)
+		fw_setenv upgrade_available 0
+		# Unset changed flag after sysupgrade complete
+		fw_setenv changed
+	;;
+	linksys,mx4200v1|\
+	linksys,mx4200v2|\
+	linksys,mx4300|\
+	linksys,mx5300|\
+	linksys,mx8500)
+		mtd resetbc s_env || true
+	;;
+	netgear,wax620|\
+	netgear,wax630)
+		fw_setenv boot_count 0
+	;;
+	esac
+}
